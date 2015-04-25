@@ -8,10 +8,10 @@ possible to the standard Fetch specification at https://fetch.spec.whatwg.org.
 
 ## Installation
 
-Available on [Bower](http://bower.io) as **fetch**.
+Available on [Bower](http://bower.io) as **fetch-polyfill**.
 
 ```sh
-$ bower install fetch
+$ bower install fetch-polyfill
 ```
 
 You'll also need a Promise polyfill for older browsers.
