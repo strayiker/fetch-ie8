@@ -23,7 +23,7 @@ $ bower install es6-promise
 This can also be installed with `npm`.
 
 ```sh
-$ npm install whatwg-fetch --save
+$ npm install fetch-polyfill --save
 ```
 
 (For a node.js implementation, try [node-fetch](https://github.com/bitinn/node-fetch))
