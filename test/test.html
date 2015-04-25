@@ -7,14 +7,17 @@
 </head>
 <body>
   <div id="mocha"></div>
-  <script src="../node_modules/chai/chai.js"></script>
+  <!--[if lt IE 9]>
+    <script src="./es5shimsham.js"></script>
+  <![endif]-->
+  <script src="./assert.js"></script>
   <script src="../node_modules/mocha/mocha.js"></script>
   <script>
     mocha.setup('tdd')
-    self.assert = chai.assert
+    //self.assert = chai.assert
   </script>
 
-  <script src="../bower_components/es6-promise/promise.js"></script>
+  <script src="../node_modules/es6-promise/dist/es6-promise.min.js"></script>
   <script src="../fetch.js"></script>
 
   <script src="test.js"></script>

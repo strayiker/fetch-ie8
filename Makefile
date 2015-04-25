@@ -1,4 +1,4 @@
-build: node_modules/ bower_components/
+build: node_modules/ assert
 
 test: node_modules/ build lint
 	./script/test
@@ -6,13 +6,13 @@ test: node_modules/ build lint
 lint: node_modules/
 	./node_modules/.bin/jshint *.js test/*.js
 
-bower_components/: node_modules/
-	./node_modules/.bin/bower install
+assert: node_modules/
+	./node_modules/.bin/browserify src/assert.js -s assert > test/assert.js
 
 node_modules/:
 	npm install
 
 clean:
-	rm -rf ./bower_components ./node_modules
+	rm -rf ./node_modules
 
 .PHONY: build clean lint test saucelabs travis

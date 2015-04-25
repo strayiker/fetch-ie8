@@ -38,7 +38,7 @@ test('resolves promise on 500 error', function() {
 test.skip('rejects promise for network error', function() {
   return fetch('/error').then(function(response) {
     assert(false, 'HTTP status ' + response.status + ' was treated as success')
-  }).catch(function(error) {
+  })['catch'](function(error) {
     assert(error instanceof TypeError, 'Rejected with Error')
   })
 })
@@ -83,7 +83,7 @@ suite('Headers', function() {
     var headers = new Headers()
     headers.set('Content-Type', 'application/json')
     assert.isTrue(headers.has('Content-Type'))
-    headers.delete('Content-Type')
+    headers['delete']('Content-Type')
     assert.isFalse(headers.has('Content-Type'))
     assert.isNull(headers.get('Content-Type'))
   })
@@ -293,7 +293,7 @@ suite('Body mixin', function() {
         response.blob()
         assert.equal(response.bodyUsed, true)
         return response.arrayBuffer()
-      }).catch(function(error) {
+      })['catch'](function(error) {
         assert(error instanceof TypeError, 'Promise rejected after body consumed')
       })
     })
@@ -343,7 +343,7 @@ suite('Body mixin', function() {
         response.text()
         assert.equal(response.bodyUsed, true)
         return response.blob()
-      }).catch(function(error) {
+      })['catch'](function(error) {
         assert(error instanceof TypeError, 'Promise rejected after body consumed')
       })
     })
@@ -367,7 +367,7 @@ suite('Body mixin', function() {
         assert(response.formData, 'Body does not implement formData')
         response.formData()
         return response.formData()
-      }).catch(function(error) {
+      })['catch'](function(error) {
         assert(error instanceof TypeError, 'Promise rejected after body consumed')
       })
     })
@@ -398,7 +398,7 @@ suite('Body mixin', function() {
         response.text()
         assert.equal(response.bodyUsed, true)
         return response.json()
-      }).catch(function(error) {
+      })['catch'](function(error) {
         assert(error instanceof TypeError, 'Promise rejected after body consumed')
       })
     })
@@ -406,7 +406,7 @@ suite('Body mixin', function() {
     test('handles json parse error', function() {
       return fetch('/json-error').then(function(response) {
         return response.json()
-      }).catch(function(error) {
+      })['catch'](function(error) {
         assert(error instanceof Error, 'JSON exception is an Error instance')
         assert(error.message, 'JSON exception has an error message')
       })
@@ -438,7 +438,7 @@ suite('Body mixin', function() {
         response.text()
         assert.equal(response.bodyUsed, true)
         return response.text()
-      }).catch(function(error) {
+      })['catch'](function(error) {
         assert(error instanceof TypeError, 'Promise rejected after body consumed')
       })
     })
@@ -460,7 +460,7 @@ suite('Methods', function() {
 
   // TODO: Waiting to verify behavior
   test.skip('GET with body throws TypeError', function() {
-    assert.throw(function() {
+    assert.throws(function() {
       new Request('', {
         method: 'get',
         body: 'invalid'
@@ -469,7 +469,7 @@ suite('Methods', function() {
   })
 
   test.skip('HEAD with body throws TypeError', function() {
-    assert.throw(function() {
+    assert.throws(function() {
       new Request('', {
         method: 'head',
         body: 'invalid'
