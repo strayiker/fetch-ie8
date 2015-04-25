@@ -1,5 +1,7 @@
 # window.fetch polyfill
 
+**This fork supports IE8 with es5-shim, es5-sham and es6-promise**
+
 The global `fetch` function is an easier way to make web requests and handle
 responses than using an XMLHttpRequest. This polyfill is written as closely as
 possible to the standard Fetch specification at https://fetch.spec.whatwg.org.
@@ -157,4 +159,4 @@ header hack.
 
 ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 --- | --- | --- | --- | --- |
-Latest ✔ | Latest ✔ | 9+ ✔ | Latest ✔ | 6.1+ ✔ |
+Latest ✔ | Latest ✔ | 8+ ✔ | Latest ✔ | 6.1+ ✔ |
