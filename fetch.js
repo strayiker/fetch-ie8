@@ -256,11 +256,25 @@
     return head
   }
 
+  var noXhrPatch =
+    typeof window !== 'undefined' && !!window.ActiveXObject &&
+      !(window.XMLHttpRequest && (new XMLHttpRequest).dispatchEvent);
+
+  Request.prototype.getXhr = function () {
+    // from backbone.js 1.1.2
+    // https://github.com/jashkenas/backbone/blob/1.1.2/backbone.js#L1181
+    if (noXhrPatch && !(/^(get|post|head|put|delete|options)$/i.test(this.method))) {
+      this.usingActiveXhr = true;
+      return new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return new XMLHttpRequest();
+  }
+
   Request.prototype.fetch = function() {
     var self = this
 
     return new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest()
+      var xhr = self.getXhr();
       if (self.credentials === 'cors') {
         xhr.withCredentials = true;
       }
@@ -278,7 +292,7 @@
         return;
       }
 
-      xhr.onreadystatechange = xhr.onload = function() {
+      function onload() {
         if (xhr.readyState !== 4) {
           return
         }
@@ -296,9 +310,12 @@
         var body = 'response' in xhr ? xhr.response : xhr.responseText;
         resolve(new Response(body, options))
       }
-
-      xhr.onerror = function() {
-        reject(new TypeError('Network request failed'))
+      xhr.onreadystatechange = onload;
+      if (!self.usingActiveXhr) {
+        xhr.onload = onload;
+        xhr.onerror = function() {
+          reject(new TypeError('Network request failed'))
+        }
       }
 
       xhr.open(self.method, self.url, true)
