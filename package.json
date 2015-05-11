@@ -1,6 +1,6 @@
 {
   "name": "fetch-polyfill",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "main": "fetch.js",
   "repository": "undoZen/fetch",
   "licenses": [
