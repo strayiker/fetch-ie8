@@ -1,28 +1,40 @@
 function readBlobAsText(blob) {
-  return new Promise(function(resolve, reject) {
-    var reader = new FileReader()
-    reader.onload = function() {
-      resolve(reader.result)
-    }
-    reader.onerror = function() {
-      reject(reader.error)
-    }
-    reader.readAsText(blob)
-  })
+  if ('FileReader' in self) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader()
+      reader.onload = function() {
+        resolve(reader.result)
+      }
+      reader.onerror = function() {
+        reject(reader.error)
+      }
+      reader.readAsText(blob)
+    })
+  } else if ('FileReaderSync' in self) {
+    return new FileReaderSync().readAsText(blob)
+  } else {
+    throw new ReferenceError('FileReader is not defined')
+  }
 }
 
 function readBlobAsBytes(blob) {
-  return new Promise(function(resolve, reject) {
-    var reader = new FileReader()
-    reader.onload = function() {
-      var view = new Uint8Array(reader.result)
-      resolve(Array.prototype.slice.call(view))
-    }
-    reader.onerror = function() {
-      reject(reader.error)
-    }
-    reader.readAsArrayBuffer(blob)
-  })
+  if ('FileReader' in self) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader()
+      reader.onload = function() {
+        var view = new Uint8Array(reader.result)
+        resolve(Array.prototype.slice.call(view))
+      }
+      reader.onerror = function() {
+        reject(reader.error)
+      }
+      reader.readAsArrayBuffer(blob)
+    })
+  } else if ('FileReaderSync' in self) {
+    return new FileReaderSync().readAsArrayBuffer(blob)
+  } else {
+    throw new ReferenceError('FileReader is not defined')
+  }
 }
 
 test('resolves promise on 500 error', function() {
@@ -127,6 +139,22 @@ suite('Request', function() {
         'X-Test': '42'
       }
     }).then(function(response) {
+      return response.json()
+    }).then(function(json) {
+      assert.equal(json.headers['accept'], 'application/json')
+      assert.equal(json.headers['x-test'], '42')
+    })
+  })
+
+  test('fetch request', function() {
+    var request = new Request('/request', {
+      headers: {
+        'Accept': 'application/json',
+        'X-Test': '42'
+      }
+    })
+
+    return fetch(request).then(function(response) {
       return response.json()
     }).then(function(json) {
       assert.equal(json.headers['accept'], 'application/json')
