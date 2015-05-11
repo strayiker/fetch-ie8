@@ -82,13 +82,13 @@
 
   function consumed(body) {
     if (body.bodyUsed) {
-      return Promise.reject(new TypeError('Already read'))
+      return fetch.Promise.reject(new TypeError('Already read'))
     }
     body.bodyUsed = true
   }
 
   function fileReaderReady(reader) {
-    return new Promise(function(resolve, reject) {
+    return new fetch.Promise(function(resolve, reject) {
       reader.onload = function() {
         resolve(reader.result)
       }
@@ -148,11 +148,11 @@
         }
 
         if (this._bodyBlob) {
-          return Promise.resolve(this._bodyBlob)
+          return fetch.Promise.resolve(this._bodyBlob)
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as blob')
         } else {
-          return Promise.resolve(new Blob([this._bodyText]))
+          return fetch.Promise.resolve(new Blob([this._bodyText]))
         }
       }
 
@@ -171,7 +171,7 @@
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as text')
         } else {
-          return Promise.resolve(this._bodyText)
+          return fetch.Promise.resolve(this._bodyText)
         }
       }
     } else {
@@ -190,7 +190,7 @@
 
       this.text = function() {
         var rejected = consumed(this)
-        return rejected ? rejected : Promise.resolve(this._bodyText)
+        return rejected ? rejected : fetch.Promise.resolve(this._bodyText)
       }
     }
 
@@ -275,7 +275,7 @@
   Request.prototype.fetch = function() {
     var self = this
 
-    return new Promise(function(resolve, reject) {
+    return new fetch.Promise(function(resolve, reject) {
       var xhr = self.getXhr();
       if (self.credentials === 'cors') {
         xhr.withCredentials = true;
@@ -359,8 +359,10 @@
   self.Request = Request;
   self.Response = Response;
 
-  self.fetch = function (url, options) {
+  self.fetch = fetch;
+  function fetch(url, options) {
     return new Request(url, options).fetch()
   }
-  self.fetch.polyfill = true
+  fetch.Promise = self.Promise; // you could change it to your favorite alternative
+  fetch.polyfill = true;
 })();
