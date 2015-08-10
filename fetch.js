@@ -294,7 +294,7 @@
 
     return new fetch.Promise(function(resolve, reject) {
       var xhr = getXhr();
-      if (request.credentials === 'cors') {
+      if (request.credentials === 'include') {
         xhr.withCredentials = true;
       }
 
