@@ -354,4 +354,9 @@
   }
   fetch.Promise = self.Promise; // you could change it to your favorite alternative
   self.fetch.polyfill = true
+
+  // Support CommonJS
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = fetch;
+  }
 })();
