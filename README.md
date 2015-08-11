@@ -1,6 +1,8 @@
 # window.fetch polyfill
 
-**This fork supports IE8 with es5-shim, es5-sham and es6-promise**
+**This fork supports IE8 with es5-shim, es5-sham and es6-promise.**
+
+**If you also use JSONP, checkout [fetch-jsonp](https://github.com/camsong/fetch-jsonp).**
 
 The global `fetch` function is an easier way to make web requests and handle
 responses than using an XMLHttpRequest. This polyfill is written as closely as
