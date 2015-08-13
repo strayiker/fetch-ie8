@@ -1,7 +1,9 @@
 (function() {
   'use strict';
 
-  if (self.fetch) {
+  // if __disableNativeFetch is set to true, the it will always polyfill fetch
+  // with Ajax.
+  if (!self.__disableNativeFetch && self.fetch) {
     return
   }
 

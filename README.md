@@ -4,6 +4,10 @@
 
 **If you also use JSONP, checkout [fetch-jsonp](https://github.com/camsong/fetch-jsonp).**
 
+**Fetch API is still very new and not fully supported in some browsers, so you may
+need to check browser verson as well as if `window.fetch` exists. In this case,
+you can set `window.__disableNativeFetch = true` to use AJAX polyfill always.**
+
 The global `fetch` function is an easier way to make web requests and handle
 responses than using an XMLHttpRequest. This polyfill is written as closely as
 possible to the standard Fetch specification at https://fetch.spec.whatwg.org.
