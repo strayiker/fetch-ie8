@@ -282,9 +282,6 @@
 
     return new fetch.Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
-      if (request.credentials === 'include') {
-        xhr.withCredentials = true;
-      }
 
       function responseURL() {
         if ('responseURL' in xhr) {
@@ -326,6 +323,20 @@
       }
 
       xhr.open(request.method, request.url, true)
+
+      // `withCredentials` should be setted after calling `.open` in IE10
+      // http://stackoverflow.com/a/19667959/1219343
+      try {
+        if (request.credentials === 'include') {
+          if ('withCredentials' in xhr) {
+            xhr.withCredentials = true;
+          } else {
+            console.error && console.error('withCredentials not supported');
+          }
+        }
+      } catch (e) {
+        console.error && console.error('set withCredentials error:' + e);
+      }
 
       if ('responseType' in xhr && support.blob) {
         xhr.responseType = 'blob'
