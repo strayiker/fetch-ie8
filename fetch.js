@@ -331,11 +331,11 @@
           if ('withCredentials' in xhr) {
             xhr.withCredentials = true;
           } else {
-            console.error && console.error('withCredentials not supported');
+            console && console.warn && console.warn('withCredentials is not supported, you can ignore this warning');
           }
         }
       } catch (e) {
-        console.error && console.error('set withCredentials error:' + e);
+        console && console.warn && console.warn('set withCredentials error:' + e);
       }
 
       if ('responseType' in xhr && support.blob) {
