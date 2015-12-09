@@ -9,7 +9,7 @@
 
   function normalizeName(name) {
     if (typeof name !== 'string') {
-      name = name.toString();
+      name = String(name)
     }
     if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
       throw new TypeError('Invalid character in header field name')
@@ -19,7 +19,7 @@
 
   function normalizeValue(value) {
     if (typeof value !== 'string') {
-      value = value.toString();
+      value = String(value)
     }
     return value
   }
@@ -27,18 +27,15 @@
   function Headers(headers) {
     this.map = {}
 
-    var self = this
     if (headers instanceof Headers) {
-      headers.forEach(function(name, values) {
-        values.forEach(function(value) {
-          self.append(name, value)
-        })
-      })
+      headers.forEach(function(value, name) {
+        this.append(name, value)
+      }, this)
 
     } else if (headers) {
       Object.getOwnPropertyNames(headers).forEach(function(name) {
-        self.append(name, headers[name])
-      })
+        this.append(name, headers[name])
+      }, this)
     }
   }
 
@@ -74,23 +71,23 @@
     this.map[normalizeName(name)] = [normalizeValue(value)]
   }
 
-  // Instead of iterable for now.
-  Headers.prototype.forEach = function(callback) {
-    var self = this
+  Headers.prototype.forEach = function(callback, thisArg) {
     Object.getOwnPropertyNames(this.map).forEach(function(name) {
-      callback(name, self.map[name])
-    })
+      this.map[name].forEach(function(value) {
+        callback.call(thisArg, value, name, this)
+      }, this)
+    }, this)
   }
 
   function consumed(body) {
     if (body.bodyUsed) {
-      return fetch.Promise.reject(new TypeError('Already read'))
+      return Promise.reject(new TypeError('Already read'))
     }
     body.bodyUsed = true
   }
 
   function fileReaderReady(reader) {
-    return new fetch.Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
       reader.onload = function() {
         resolve(reader.result)
       }
@@ -121,7 +118,8 @@
         return false
       }
     })(),
-    formData: 'FormData' in self
+    formData: 'FormData' in self,
+    arrayBuffer: 'ArrayBuffer' in self
   }
 
   function Body() {
@@ -138,6 +136,9 @@
         this._bodyFormData = body
       } else if (!body) {
         this._bodyText = ''
+      } else if (support.arrayBuffer && ArrayBuffer.prototype.isPrototypeOf(body)) {
+        // Only support ArrayBuffers for POST method.
+        // Receiving ArrayBuffers happens via Blobs, instead.
       } else {
         throw new Error('unsupported BodyInit type')
       }
@@ -151,11 +152,11 @@
         }
 
         if (this._bodyBlob) {
-          return fetch.Promise.resolve(this._bodyBlob)
+          return Promise.resolve(this._bodyBlob)
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as blob')
         } else {
-          return fetch.Promise.resolve(new Blob([this._bodyText]))
+          return Promise.resolve(new Blob([this._bodyText]))
         }
       }
 
@@ -174,13 +175,13 @@
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as text')
         } else {
-          return fetch.Promise.resolve(this._bodyText)
+          return Promise.resolve(this._bodyText)
         }
       }
     } else {
       this.text = function() {
         var rejected = consumed(this)
-        return rejected ? rejected : fetch.Promise.resolve(this._bodyText)
+        return rejected ? rejected : Promise.resolve(this._bodyText)
       }
     }
 
@@ -191,9 +192,7 @@
     }
 
     this.json = function() {
-      return this.text().then(function (text) {
-          return JSON.parse(text);
-      });
+      return this.text().then(JSON.parse)
     }
 
     return this
@@ -207,20 +206,44 @@
     return (methods.indexOf(upcased) > -1) ? upcased : method
   }
 
-  function Request(url, options) {
+  function Request(input, options) {
     options = options || {}
-    this.url = url
+    var body = options.body
+    if (Request.prototype.isPrototypeOf(input)) {
+      if (input.bodyUsed) {
+        throw new TypeError('Already read')
+      }
+      this.url = input.url
+      this.credentials = input.credentials
+      if (!options.headers) {
+        this.headers = new Headers(input.headers)
+      }
+      this.method = input.method
+      this.mode = input.mode
+      if (!body) {
+        body = input._bodyInit
+        input.bodyUsed = true
+      }
+    } else {
+      this.url = input
+    }
 
-    this.credentials = options.credentials || 'omit'
-    this.headers = new Headers(options.headers)
-    this.method = normalizeMethod(options.method || 'GET')
-    this.mode = options.mode || null
+    this.credentials = options.credentials || this.credentials || 'omit'
+    if (options.headers || !this.headers) {
+      this.headers = new Headers(options.headers)
+    }
+    this.method = normalizeMethod(options.method || this.method || 'GET')
+    this.mode = options.mode || this.mode || null
     this.referrer = null
 
-    if ((this.method === 'GET' || this.method === 'HEAD') && options.body) {
+    if ((this.method === 'GET' || this.method === 'HEAD') && body) {
       throw new TypeError('Body not allowed for GET or HEAD requests')
     }
-    this._initBody(options.body)
+    this._initBody(body)
+  }
+
+  Request.prototype.clone = function() {
+    return new Request(this)
   }
 
   function decode(body) {
@@ -257,7 +280,6 @@
 
     this._initBody(bodyInit)
     this.type = 'default'
-    this.url = null
     this.status = options.status
     this.ok = this.status >= 200 && this.status < 300
     this.statusText = options.statusText
@@ -267,21 +289,45 @@
 
   Body.call(Response.prototype)
 
+  Response.prototype.clone = function() {
+    return new Response(this._bodyInit, {
+      status: this.status,
+      statusText: this.statusText,
+      headers: new Headers(this.headers),
+      url: this.url
+    })
+  }
+
+  Response.error = function() {
+    var response = new Response(null, {status: 0, statusText: ''})
+    response.type = 'error'
+    return response
+  }
+
+  var redirectStatuses = [301, 302, 303, 307, 308]
+
+  Response.redirect = function(url, status) {
+    if (redirectStatuses.indexOf(status) === -1) {
+      throw new RangeError('Invalid status code')
+    }
+
+    return new Response(null, {status: status, headers: {location: url}})
+  }
+
   self.Headers = Headers;
   self.Request = Request;
   self.Response = Response;
 
   self.fetch = function(input, init) {
-    // TODO: Request constructor should accept input, init
-    var request
-    if (Request.prototype.isPrototypeOf(input) && !init) {
-      request = input
-    } else {
-      request = new Request(input, init)
-    }
+    return new Promise(function(resolve, reject) {
+      var request
+      if (Request.prototype.isPrototypeOf(input) && !init) {
+        request = input
+      } else {
+        request = new Request(input, init)
+      }
 
-    return new fetch.Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest();
+      var xhr = new XMLHttpRequest()
 
       function responseURL() {
         if ('responseURL' in xhr) {
@@ -315,11 +361,9 @@
         resolve(new Response(body, options))
       }
       xhr.onreadystatechange = onload;
-      if (!self.usingActiveXhr) {
-        xhr.onload = onload;
-        xhr.onerror = function() {
-          reject(new TypeError('Network request failed'))
-        }
+      xhr.onload = onload; // FIX: may fire two times
+      xhr.onerror = function() {
+        reject(new TypeError('Network request failed'))
       }
 
       xhr.open(request.method, request.url, true)
@@ -342,16 +386,13 @@
         xhr.responseType = 'blob'
       }
 
-      request.headers.forEach(function(name, values) {
-        values.forEach(function(value) {
-          xhr.setRequestHeader(name, value)
-        })
+      request.headers.forEach(function(value, name) {
+        xhr.setRequestHeader(name, value)
       })
 
       xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit)
     })
   }
-  fetch.Promise = self.Promise; // you could change it to your favorite alternative
   self.fetch.polyfill = true
 
   // Support CommonJS
