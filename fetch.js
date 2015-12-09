@@ -342,12 +342,15 @@
         return;
       }
 
+      var __onLoadHandled = false;
+
       function onload() {
         if (xhr.readyState !== 4) {
           return
         }
         var status = (xhr.status === 1223) ? 204 : xhr.status
         if (status < 100 || status > 599) {
+          if (__onLoadHandled) { return; } else { __onLoadHandled = true; }
           reject(new TypeError('Network request failed'))
           return
         }
@@ -358,11 +361,14 @@
           url: responseURL()
         }
         var body = 'response' in xhr ? xhr.response : xhr.responseText;
+
+        if (__onLoadHandled) { return; } else { __onLoadHandled = true; }
         resolve(new Response(body, options))
       }
       xhr.onreadystatechange = onload;
-      xhr.onload = onload; // FIX: may fire two times
+      xhr.onload = onload;
       xhr.onerror = function() {
+        if (__onLoadHandled) { return; } else { __onLoadHandled = true; }
         reject(new TypeError('Network request failed'))
       }
 
