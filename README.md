@@ -14,20 +14,6 @@ possible to the standard Fetch specification at https://fetch.spec.whatwg.org.
 
 ## Installation
 
-Available on [Bower](http://bower.io) as **fetch-ie8**.
-
-```sh
-$ bower install fetch-ie8
-```
-
-You'll also need a Promise polyfill for older browsers.
-
-```sh
-$ bower install es6-promise
-```
-
-Install with `npm`.
-
 ```sh
 $ npm install fetch-ie8 --save
 ```
