@@ -14,10 +14,10 @@ possible to the standard Fetch specification at https://fetch.spec.whatwg.org.
 
 ## Installation
 
-Available on [Bower](http://bower.io) as **fetch-polyfill**.
+Available on [Bower](http://bower.io) as **fetch-ie8**.
 
 ```sh
-$ bower install fetch-polyfill
+$ bower install fetch-ie8
 ```
 
 You'll also need a Promise polyfill for older browsers.
@@ -26,10 +26,16 @@ You'll also need a Promise polyfill for older browsers.
 $ bower install es6-promise
 ```
 
-This can also be installed with `npm`.
+Install with `npm`.
 
 ```sh
-$ npm install fetch-polyfill --save
+$ npm install fetch-ie8 --save
+```
+
+You'll also need a Promise polyfill for older browsers.
+
+```sh
+$ npm install es6-promise
 ```
 
 (For a node.js implementation, try [node-fetch](https://github.com/bitinn/node-fetch))
