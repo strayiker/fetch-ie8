@@ -105,7 +105,13 @@
 
   function readBlobAsText(blob) {
     var reader = new FileReader()
-    reader.readAsText(blob)
+    var _charset = blob.type.match(/charset\=[0-9a-zA-Z\-\_]*;?/)
+    var args = [blob]
+    if(_charset) {
+      args.push(_charset[0].replace(/^charset\=/, '').replace(/;$/, ''))
+    }
+
+    reader.readAsText.apply(reader, args)
     return fileReaderReady(reader)
   }
 
