@@ -1,3 +1,7 @@
+1.4.1 / 2016-01-20
+==================
+* Make blob supporting different encoding, fixed #1
+
 1.4.0 / 2015-12-09
 ==================
 * Sync with github/fetch
