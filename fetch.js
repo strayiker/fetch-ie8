@@ -103,10 +103,13 @@
     return fileReaderReady(reader)
   }
 
-  function readBlobAsText(blob) {
+  function readBlobAsText(blob, options) {
     var reader = new FileReader()
-    var _charset = blob.type.match(/charset\=[0-9a-zA-Z\-\_]*;?/)
+    var contentType = options.headers.map['content-type'] ? options.headers.map['content-type'].toString() : ''
+    var regex = /charset\=[0-9a-zA-Z\-\_]*;?/
+    var _charset = blob.type.match(regex) || contentType.match(regex)
     var args = [blob]
+
     if(_charset) {
       args.push(_charset[0].replace(/^charset\=/, '').replace(/;$/, ''))
     }
@@ -132,12 +135,13 @@
     this.bodyUsed = false
 
 
-    this._initBody = function(body) {
+    this._initBody = function(body, options) {
       this._bodyInit = body
       if (typeof body === 'string') {
         this._bodyText = body
       } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
         this._bodyBlob = body
+        this._options = options
       } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
         this._bodyFormData = body
       } else if (!body) {
@@ -177,7 +181,7 @@
         }
 
         if (this._bodyBlob) {
-          return readBlobAsText(this._bodyBlob)
+          return readBlobAsText(this._bodyBlob, this._options)
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as text')
         } else {
@@ -245,7 +249,7 @@
     if ((this.method === 'GET' || this.method === 'HEAD') && body) {
       throw new TypeError('Body not allowed for GET or HEAD requests')
     }
-    this._initBody(body)
+    this._initBody(body, options)
   }
 
   Request.prototype.clone = function() {
@@ -284,7 +288,7 @@
       options = {}
     }
 
-    this._initBody(bodyInit)
+    this._initBody(bodyInit, options)
     this.type = 'default'
     this.status = options.status
     this.ok = this.status >= 200 && this.status < 300
