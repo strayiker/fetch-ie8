@@ -1,3 +1,7 @@
+1.4.2 / 2016-03-13
+==================
+* Fix request and response content-type different bug
+
 1.4.1 / 2016-01-20
 ==================
 * Make blob supporting different encoding, fixed #1
