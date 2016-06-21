@@ -413,6 +413,6 @@
 
   // Support CommonJS
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = fetch;
+    module.exports = self.fetch;
   }
 })();
