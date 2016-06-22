@@ -1,3 +1,7 @@
+1.4.3 / 2016-06-22
+==================
+* Compatibility when defining the global object, merged #5
+
 1.4.2 / 2016-03-13
 ==================
 * Fix request and response content-type different bug
