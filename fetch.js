@@ -329,7 +329,8 @@
   self.Response = Response;
 
   self.fetch = function(input, init) {
-    return new Promise(function(resolve, reject) {
+    var xhr;
+    var promise = new Promise(function(resolve, reject) {
       var request
       if (Request.prototype.isPrototypeOf(input) && !init) {
         request = input
@@ -337,7 +338,7 @@
         request = new Request(input, init)
       }
 
-      var xhr = new XMLHttpRequest()
+      xhr = new XMLHttpRequest()
 
       function responseURL() {
         if ('responseURL' in xhr) {
@@ -407,7 +408,9 @@
       })
 
       xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit)
-    })
+    });
+    promise.cancel = function() { xhr.abort(); };
+    return promise;
   }
   self.fetch.polyfill = true
 
